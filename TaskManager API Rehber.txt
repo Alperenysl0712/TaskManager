@@ -1,0 +1,106 @@
+📘 TaskManager API Dokümantasyonu
+
+🔐 Kullanıcı Giriş & Kayıt
+
+*** Register POST (api/login/register) ***
+Kullanıcılar kayıt olabilir. 
+
+Varsayılan role "User" olarak atanır.
+İsteyen "Admin" olarak da atanabilir.
+
+Şifreler hashPassword yöntemi ile veritabanında güvenli şekilde saklanır.
+
+*** Login POST (api/login) ***
+Kullanıcı girişinde e-posta ve şifre doğrulanır.
+
+Şifre, hash'lenmiş haliyle karşılaştırılır. Bilgiler doğruysa JWT Token döndürülür.
+
+
+
+📝 Görev Oluşturma
+
+*** Endpoint: POST api/Task ***
+
+Bu alan sadece JWT Token taşıyan kullanıcılar içindir.
+Token'ı olmayan kullanıcılar görev ekleyemez.
+
+Görev ekleme alanında kullanıcıdan başlık, açıklama, bitiş tarihi, öncelik, durum ve periyot bilgileri istenir.
+Enum değerleri aşağıdaki gibidir:
+
+	📌 Enum Seçenekleri:
+
+	priority: Low, Normal, High
+
+	status: Pending, InProgress, Completed, Cancelled
+
+	period: Daily, Weekly, Monthly
+
+	📝 dueDate formatı: yyyy-MM-ddTHH:mm:ss
+	
+	Örnek: 2025-04-20T12:34:53
+
+
+
+📄 Görev Listeleme
+
+*** Endpoint: GET api/Task/list ***
+Bu işlem de sadece JWT Token ile yapılabilir.
+
+Eğer giriş yapan kullanıcı "User" rolündeyse sadece kendi oluşturduğu görevleri görür.
+Kullanıcı "Admin" rolündeyse tüm kullanıcıların görevlerini görebilir.
+
+Görevleri filtrelemek için opsiyonel olarak period parametresi kullanılabilir.
+
+Örneğin: daily, weekly veya monthly görevleri görmek için
+[api/Task/list?period=Daily] şeklinde istek yapılabilir.
+
+Eğer period verilmezse tüm görevler listelenir.
+
+
+
+🗄 Veritabanı
+
+Veriler MSSQL ortamında saklanmaktadır.
+
+Veritabanı yedeği .bak uzantılı dosya olarak alınabilir.
+
+Sistemin başka bir SQL Server ortamında çalıştırılması için appsettings.json dosyasındaki bağlantı ayarları düzenlenmelidir.
+
+Bağlantı türleri:
+
+	Windows Authentication kullanılıyorsa:
+
+		Server, Database ve Trusted_Connection ayarı yeterlidir.
+
+		Kullanıcı adı ve şifre gerekmez. Otomatik oturum kimliği ile bağlanır.
+
+		"ConnectionStrings": {
+			"DefaultConnection": "Server=localhost;Database=TaskManager;Trusted_Connection=True;TrustServerCertificate=True;"
+		}
+
+
+	SQL Server Authentication kullanılacaksa:
+
+		Server ve Database bilgilerine ek olarak kullanıcı adı (User Id) ve şifre (Password) bilgileri girilmelidir.
+
+		Bu durumda Trusted_Connection kullanılmaz.
+
+		"ConnectionStrings": {
+  			"DefaultConnection": "Server=localhost;Database=TaskManager;User Id=sa;Password=YourPassword123!;TrustServerCertificate=True;"
+		}
+
+
+👥 Varsayılan Kullanıcılar ve Görevler
+
+Sisteme başlangıçta tanımlı olarak gelen 2 kullanıcı ve 2 görev mevcuttur.
+Bu veriler veritabanında yer almakta olup test amacıyla kullanılabilir veya silinebilir.
+
+Kullanıcılar:
+
+Admin Kullanıcı
+E-posta: admin@mail.com
+Şifre: admin123
+
+Normal Kullanıcı (User)
+E-posta: user@mail.com
+Şifre: user123
